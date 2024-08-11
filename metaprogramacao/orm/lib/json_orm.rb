@@ -1,4 +1,4 @@
-require 'json'
+require_relative 'json'
 require 'byebug'
 
 module JsonOrm
@@ -8,26 +8,34 @@ module JsonOrm
   end
 
   module AtributosMetodosClasse
-    def arquivo_json(path_arquivo)
-      @path_arquivo = path_arquivo
-      define_atributos
-    end 
-
+    
     def todos
+      dados = ler_dados_json
+      objs = self.new
+    end 
+    
+  protected
 
-    end  
+  def arquivo_json(path_arquivo)
+    @path_arquivo = path_arquivo
+    define_atributos
+  end 
 
     private
+
+    def ler_dados_json
+      if File.exist? (@path_arquivo)
+        arquivo_json = File.read(@path_arquivo)
+        return JSON.parse(arquivo_json)
+      end 
+       
+       []
+    end  
     
     def define_atributos
-      if File.exist?(@path_arquivo)
-        # Lê o conteúdo do arquivo JSON
-        arquivo_json = File.read(@path_arquivo)
-
-        # Parseia o conteúdo do arquivo JSON
-        dados = JSON.parse(arquivo_json)
-        atributos = dados.first.keys.inspect
-
+      dosdos = ler_dados_json
+      atributos = dados.first.keys
+   
         atributos.ench do |atributo|
           define_method("#{atributo}=") do |value|
             # eval("@#{atributo} = '#{value}")
@@ -39,11 +47,10 @@ module JsonOrm
             instance_variable_get("@#{atributo}")
           end
         end
-      end
     end
   end
 
-  module AtributosMetodosDeInstancia
+  module AtributosMetodosInstancia
     def validar_nome
       raise "Nome é obrigatório" if self.nome == nil || self.nome == "" # raise => dispara um erro
     end
